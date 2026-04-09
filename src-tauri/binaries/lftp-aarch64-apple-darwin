@@ -1,0 +1,3 @@
+#!/bin/sh
+echo "Bundled lftp sidecar placeholder. Run the release prep workflow or packaging scripts to replace this file with a real lftp binary." >&2
+exit 1

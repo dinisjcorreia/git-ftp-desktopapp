@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+echo "Bundled git-ftp placeholder. Run the release prep workflow or packaging scripts to replace this file with the real git-ftp script." >&2
+exit 1

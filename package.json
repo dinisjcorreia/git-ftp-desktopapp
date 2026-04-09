@@ -1,0 +1,37 @@
+{
+  "name": "git-ftp-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Cross-platform desktop GUI for the user-installed git-ftp CLI.",
+  "author": "Dinis Correia <https://github.com/dinisjcorreia>",
+  "homepage": "https://github.com/dinisjcorreia/git-ftp-desktopapp",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dinisjcorreia/git-ftp-desktopapp.git"
+  },
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 1420",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "tauri": "node scripts/run-tauri.mjs"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.0.0",
+    "@tauri-apps/plugin-dialog": "^2.0.0",
+    "@tauri-apps/plugin-opener": "^2.0.0",
+    "clsx": "^2.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}

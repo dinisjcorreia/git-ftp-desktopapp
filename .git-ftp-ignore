@@ -1,0 +1,15 @@
+# Runtime state and generated server-side session data should never be redeployed.
+sessions/
+
+# Local platform noise.
+.DS_Store
+Thumbs.db
+thumbs.db
+
+# Generated logs and sync state snapshots.
+*.log
+sync_state.json
+
+# One-off export and migration dump artifacts that should not be part of normal FTP syncs.
+wc-product-export-*.csv
+*.WordPress.*.xml
