@@ -1,7 +1,7 @@
 {
   "name": "git-ftp-desktop",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cross-platform desktop GUI for the user-installed git-ftp CLI.",
   "author": "Dinis Correia <https://github.com/dinisjcorreia>",
   "homepage": "https://github.com/dinisjcorreia/git-ftp-desktopapp",

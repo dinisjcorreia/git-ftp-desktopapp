@@ -1,6 +1,6 @@
 [package]
 name = "git-ftp-desktop"
-version = "0.1.0"
+version = "0.1.1"
 description = "Cross-platform desktop GUI for the user-installed git-ftp CLI."
 authors = ["Dinis Correia <https://github.com/dinisjcorreia>"]
 license = "GPL-3.0-only"

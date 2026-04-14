@@ -174,6 +174,7 @@ To sign installers and reduce SmartScreen warnings, configure:
 
 Release packaging includes third-party notices and license files for bundled tools.
 
+- Project license: [GPL-3.0-only](LICENSE)
 - Notices file: [THIRD_PARTY_NOTICES.md](src-tauri/resources/third-party/THIRD_PARTY_NOTICES.md)
 - Release packaging guide: [release-packaging.md](docs/release-packaging.md)
 
