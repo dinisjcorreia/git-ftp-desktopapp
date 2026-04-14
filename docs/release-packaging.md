@@ -50,6 +50,8 @@ They are responsible for:
 - populating the bundled `lftp` binary for the target platform
 - copying Linux-specific `liblftp` runtime libraries next to the sidecar binary and rewriting the
   sidecar rpath so Tauri can resolve them during packaging
+- copying only the Windows runtime DLLs reported by `ldd` for `lftp.exe`, not every DLL from the
+  MSYS2 bin directory
 - copying upstream license texts into the packaged resources tree
 
 ## Licensing
@@ -58,6 +60,8 @@ Before publishing release artifacts, the release workflow must populate:
 
 - `src-tauri/resources/third-party/licenses/git-ftp/LICENSE`
 - `src-tauri/resources/third-party/licenses/lftp/COPYING`
+- `src-tauri/resources/third-party/licenses/lftp/windows-dependencies/` when Windows DLL
+  dependencies are bundled
 
 The packaged app also includes `src-tauri/resources/third-party/THIRD_PARTY_NOTICES.md`.
 
@@ -65,6 +69,7 @@ Current documented bundled third-party components:
 
 - `git-ftp`
 - `lftp`
+- MSYS2 packages that own copied Windows `lftp` runtime DLLs
 
 ## Signing inputs
 

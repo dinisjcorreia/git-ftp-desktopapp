@@ -7,7 +7,6 @@ LFTP_VERSION="${3:-4.9.3}"
 
 BIN_DIR="${ROOT_DIR}/binaries"
 LICENSE_DIR="${ROOT_DIR}/resources/third-party/licenses/lftp"
-REPO_LICENSE_FALLBACK="LICENSE"
 
 mkdir -p "${BIN_DIR}" "${LICENSE_DIR}"
 
@@ -121,5 +120,12 @@ download_upstream_license() {
 }
 
 if ! copy_local_license && ! download_upstream_license; then
-  cp "${REPO_LICENSE_FALLBACK}" "${LICENSE_DIR}/COPYING"
+  echo "Could not collect upstream lftp COPYING license text." >&2
+  echo "Install lftp docs locally or allow downloading lftp-${LFTP_VERSION} source before packaging." >&2
+  exit 1
+fi
+
+if [[ ! -s "${LICENSE_DIR}/COPYING" ]]; then
+  echo "Collected lftp COPYING license is missing or empty." >&2
+  exit 1
 fi
