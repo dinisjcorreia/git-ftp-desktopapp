@@ -514,8 +514,16 @@ export default function App() {
       }
     }
 
+    const startedFromTab = workspaceTab;
     setWorkspaceTab('history');
-    await runAction(selectedProfileId, action, runOptions, passwordInput);
+    try {
+      const result = await runAction(selectedProfileId, action, runOptions, passwordInput);
+      if (startedFromTab === 'changes' && result.success) {
+        setWorkspaceTab('changes');
+      }
+    } catch (_error) {
+      // The store owns failure toasts; keep the history tab open so the log stays visible.
+    }
   };
 
   const handleCommitTrackedChanges = async () => {
