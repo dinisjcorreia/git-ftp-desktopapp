@@ -699,11 +699,9 @@ export default function App() {
             <div className="workspace__identity">
               <p className="eyebrow">Workspace</p>
               <h1>{repoName ?? 'Git FTP Desktop'}</h1>
-              <p className="workspace__subtitle">
-                {isSetupMode
-                  ? 'Connect to the server and download it into a local Git repository.'
-                  : 'A GitHub Desktop-inspired dark workspace with changes, history, and settings tucked into focused views.'}
-              </p>
+              {isSetupMode ? (
+                <p className="workspace__subtitle">Connect to the server and download it into a local Git repository.</p>
+              ) : null}
             </div>
 
             <div className="workspace__toolbar">

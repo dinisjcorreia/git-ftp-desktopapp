@@ -45,7 +45,6 @@ export function RepoSidebar({
             <h1>Deploy</h1>
           </div>
         </div>
-        <p className="sidebar__copy">A quieter, GitHub Desktop-style workspace for repos, profiles, and FTP sync runs.</p>
       </div>
 
       <section className="sidebar__section repo-panel repo-panel--current">
