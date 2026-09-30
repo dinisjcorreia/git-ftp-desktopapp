@@ -3,6 +3,7 @@ import type { MouseEvent } from 'react';
 import { openExternalUrl } from '../lib/tauri';
 import type { SavedRepository } from '../types';
 import { Icon } from './Icon';
+import appLogo from '../assets/app-logo.svg';
 
 type Props = {
   knownRepositories: SavedRepository[];
@@ -35,9 +36,7 @@ export function RepoSidebar({
   return (
     <aside className="sidebar" aria-label="Repositories">
       <button className="sidebar__brand" type="button" onClick={onGoHome} aria-label="Go to start">
-        <span className="brand-mark">
-          <Icon name="branch" />
-        </span>
+        <img className="brand-mark" src={appLogo} alt="" />
         <div>
           <strong>Git FTP</strong>
           <span>Desktop</span>

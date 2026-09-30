@@ -182,15 +182,7 @@ small {
 .brand-mark {
   width: 40px;
   height: 40px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  color: white;
-  background: var(--accent-fill);
-}
-.brand-mark .icon {
-  width: 24px;
-  height: 24px;
+  flex: 0 0 auto;
 }
 .sidebar__brand strong {
   display: block;
