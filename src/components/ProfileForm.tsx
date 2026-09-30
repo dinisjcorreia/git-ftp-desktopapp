@@ -39,15 +39,14 @@ export function ProfileForm({
     <section className="panel panel--paper settings-form">
       <div className="panel__header">
         <div>
-          <p className="eyebrow">Profile editor</p>
           <h2>{draft.id ? 'Deployment profile details' : 'New deployment profile'}</h2>
         </div>
         <div className="button-row">
           <button className="ghost-button" type="button" onClick={onValidate} disabled={disabled}>
-            Validate
+            Test connection
           </button>
           <button className="primary-button" type="button" onClick={onSave} disabled={disabled}>
-            Save
+            Save profile
           </button>
         </div>
       </div>
@@ -60,11 +59,18 @@ export function ProfileForm({
         <div className="profile-form-grid">
           <label>
             <span>Profile name</span>
-            <input value={draft.name} onChange={(event) => update('name', event.target.value)} placeholder="Production" />
+            <input
+              value={draft.name}
+              onChange={(event) => update('name', event.target.value)}
+              placeholder="Production"
+            />
           </label>
           <label>
             <span>Protocol</span>
-            <select value={draft.protocol} onChange={(event) => update('protocol', event.target.value as ProfileDraft['protocol'])}>
+            <select
+              value={draft.protocol}
+              onChange={(event) => update('protocol', event.target.value as ProfileDraft['protocol'])}
+            >
               <option value="ftp">FTP</option>
               <option value="sftp">SFTP</option>
               <option value="ftps">FTPS</option>
@@ -73,7 +79,11 @@ export function ProfileForm({
           </label>
           <label>
             <span>Host</span>
-            <input value={draft.host} onChange={(event) => update('host', event.target.value)} placeholder="ftp.example.com" />
+            <input
+              value={draft.host}
+              onChange={(event) => update('host', event.target.value)}
+              placeholder="ftp.example.com"
+            />
           </label>
           <label>
             <span>Port</span>
@@ -87,11 +97,19 @@ export function ProfileForm({
           </label>
           <label>
             <span>Username</span>
-            <input value={draft.username} onChange={(event) => update('username', event.target.value)} placeholder="deploy" />
+            <input
+              value={draft.username}
+              onChange={(event) => update('username', event.target.value)}
+              placeholder="deploy"
+            />
           </label>
           <label>
             <span>Remote path</span>
-            <input value={draft.remotePath} onChange={(event) => update('remotePath', event.target.value)} placeholder="/public_html" />
+            <input
+              value={draft.remotePath}
+              onChange={(event) => update('remotePath', event.target.value)}
+              placeholder="/public_html"
+            />
           </label>
           <label className="profile-form-grid__full">
             <span>Password</span>
@@ -146,7 +164,11 @@ export function ProfileForm({
             </div>
           </label>
           <label className="switch-card">
-            <input checked={draft.flags.autoInit} onChange={(event) => updateFlag('autoInit', event.target.checked)} type="checkbox" />
+            <input
+              checked={draft.flags.autoInit}
+              onChange={(event) => updateFlag('autoInit', event.target.checked)}
+              type="checkbox"
+            />
             <div>
               <strong>Enable auto-init</strong>
               <p>Let `git-ftp push` initialize automatically when the remote log does not exist yet.</p>
@@ -175,7 +197,11 @@ export function ProfileForm({
             />
           </label>
           <label className="switch-inline">
-            <input checked={draft.flags.activeMode} onChange={(event) => updateFlag('activeMode', event.target.checked)} type="checkbox" />
+            <input
+              checked={draft.flags.activeMode}
+              onChange={(event) => updateFlag('activeMode', event.target.checked)}
+              type="checkbox"
+            />
             <span>Use active FTP mode</span>
           </label>
           <label className="switch-inline">
@@ -197,13 +223,18 @@ export function ProfileForm({
           </div>
           <div className="validation-messages">
             {validation.messages.map((message, index) => (
-              <div key={`${message.kind}-${index}`} className={`validation-message validation-message--${message.kind}`}>
+              <div
+                key={`${message.kind}-${index}`}
+                className={`validation-message validation-message--${message.kind}`}
+              >
                 {message.text}
               </div>
             ))}
             {validation.probeResult ? (
               <>
-                <div className={`validation-message ${validation.probeResult.success ? 'validation-message--info' : 'validation-message--error'}`}>
+                <div
+                  className={`validation-message ${validation.probeResult.success ? 'validation-message--info' : 'validation-message--error'}`}
+                >
                   Probe command exit code: {validation.probeResult.exitCode ?? 'unknown'}
                 </div>
                 {validation.probeResult.stdout?.trim() ? (

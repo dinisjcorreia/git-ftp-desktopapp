@@ -101,6 +101,15 @@ npm run tauri dev
 npm run build
 ```
 
+### Check the UI
+
+```bash
+npx playwright install chromium
+npm run test:ui
+```
+
+The browser smoke check covers navigation, commit and deployment controls, profiles, import validation, and narrow layouts. It mocks Tauri commands and does not change local repositories or contact FTP servers.
+
 ### Check the Rust backend
 
 ```bash

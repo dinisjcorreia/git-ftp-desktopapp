@@ -1,3 +1,4 @@
+import { Icon } from './Icon';
 import type { ProfileDraft } from '../types';
 
 export type BootstrapFeedback = {
@@ -54,28 +55,30 @@ export function ConnectionBootstrapPanel({
     <section className="panel panel--paper connection-panel">
       <div className="panel__header">
         <div>
-          <p className="eyebrow">Step 1 · Remote connection</p>
-          <h2>Connect to the FTP site and download it locally</h2>
+          <p className="eyebrow">New connection</p>
+          <h2>Connect your site</h2>
         </div>
-        <button className="primary-button" onClick={() => void onDownload()} disabled={isBusy} type="button">
-          {isBusy ? `Downloading…${progressValue !== null ? ` ${progressValue}%` : ''}` : 'Download into local Git repo'}
-        </button>
+        <span className="connection-panel__badge">
+          <Icon name="server" /> Remote import
+        </span>
       </div>
-
-      <p className="workspace__subtitle">
-        Enter the FTP host, login details, remote folder, and an empty local destination folder first. When you run the download action, the app uses the real
-        <code> git-ftp snapshot </code>
-        flow to pull the remote site into a local Git repository, then loads that downloaded repository into the workspace.
-      </p>
+      <p className="workspace__subtitle">Add your connection details and choose an empty folder for your site.</p>
 
       <div className="profile-form-grid">
         <label>
           <span>Profile name</span>
-          <input value={draft.name} onChange={(event) => update('name', event.target.value)} placeholder="Production import" />
+          <input
+            value={draft.name}
+            onChange={(event) => update('name', event.target.value)}
+            placeholder="Production import"
+          />
         </label>
         <label>
           <span>Protocol</span>
-          <select value={draft.protocol} onChange={(event) => update('protocol', event.target.value as ProfileDraft['protocol'])}>
+          <select
+            value={draft.protocol}
+            onChange={(event) => update('protocol', event.target.value as ProfileDraft['protocol'])}
+          >
             <option value="ftp">FTP</option>
             <option value="sftp">SFTP</option>
             <option value="ftps">FTPS</option>
@@ -84,7 +87,11 @@ export function ConnectionBootstrapPanel({
         </label>
         <label>
           <span>Host</span>
-          <input value={draft.host} onChange={(event) => update('host', event.target.value)} placeholder="ftp.example.com" />
+          <input
+            value={draft.host}
+            onChange={(event) => update('host', event.target.value)}
+            placeholder="ftp.example.com"
+          />
         </label>
         <label>
           <span>Port</span>
@@ -98,11 +105,19 @@ export function ConnectionBootstrapPanel({
         </label>
         <label>
           <span>Username</span>
-          <input value={draft.username} onChange={(event) => update('username', event.target.value)} placeholder="deploy" />
+          <input
+            value={draft.username}
+            onChange={(event) => update('username', event.target.value)}
+            placeholder="deploy"
+          />
         </label>
         <label>
           <span>Remote path</span>
-          <input value={draft.remotePath} onChange={(event) => update('remotePath', event.target.value)} placeholder="/public_html" />
+          <input
+            value={draft.remotePath}
+            onChange={(event) => update('remotePath', event.target.value)}
+            placeholder="/public_html"
+          />
         </label>
         <label className="profile-form-grid__full">
           <span>Password</span>
@@ -172,8 +187,20 @@ export function ConnectionBootstrapPanel({
         </div>
       </details>
 
+      <div className="connection-panel__footer">
+        <p>Your site will be downloaded and added to your workspace.</p>
+        <button className="primary-button" onClick={() => void onDownload()} disabled={isBusy} type="button">
+          <Icon name="download" />
+          {isBusy ? `Downloading…${progressValue !== null ? ` ${progressValue}%` : ''}` : 'Download site'}
+        </button>
+      </div>
+
       {hasOutput ? (
-        <details className="bootstrap-inspector" aria-live="polite" open={feedback.tone === 'error' || feedback.tone === 'running'}>
+        <details
+          className="bootstrap-inspector"
+          aria-live="polite"
+          open={feedback.tone === 'error' || feedback.tone === 'running'}
+        >
           <summary className="bootstrap-inspector__summary">
             <div>
               <p className="eyebrow">Download inspector</p>
@@ -186,10 +213,17 @@ export function ConnectionBootstrapPanel({
             <div className="bootstrap-progress" aria-label="Remote snapshot progress">
               <div className="bootstrap-progress__meta">
                 <strong>{progressValue}%</strong>
-                <span>{feedback.tone === 'success' ? 'Snapshot complete' : feedback.tone === 'error' ? 'Stopped before completion' : 'Receiving live snapshot output'}</span>
+                <span>
+                  {feedback.tone === 'success'
+                    ? 'Snapshot complete'
+                    : feedback.tone === 'error'
+                      ? 'Stopped before completion'
+                      : 'Receiving live snapshot output'}
+                </span>
               </div>
               <div
                 className="bootstrap-progress__track"
+                aria-label="Download progress"
                 aria-valuemax={100}
                 aria-valuemin={0}
                 aria-valuenow={progressValue}
@@ -205,7 +239,10 @@ export function ConnectionBootstrapPanel({
 
           {feedback.canRemoveRemoteState ? (
             <div className="bootstrap-recovery">
-              <p>This remote already has a deployment marker from another git-ftp repo. If you want this new local repo to take over, remove the remote marker and retry.</p>
+              <p>
+                This remote already has a deployment marker from another git-ftp repo. If you want this new local repo
+                to take over, remove the remote marker and retry.
+              </p>
               <button className="ghost-button" onClick={() => void onRemoveRemoteState()} type="button">
                 Remove remote .git-ftp.log
               </button>
@@ -226,7 +263,10 @@ export function ConnectionBootstrapPanel({
               </div>
             ) : (
               <div className="console-empty">
-                <p>The first remote download will show validation notes, the redacted command preview, and any stdout or stderr here.</p>
+                <p>
+                  The first remote download will show validation notes, the redacted command preview, and any stdout or
+                  stderr here.
+                </p>
               </div>
             )}
           </div>

@@ -13,17 +13,21 @@ export function LogPanel({ activeRun, runHistory, selectedRunId, onSelectRun }: 
   const displayedRun =
     activeRun && !activeRun.finishedAt
       ? activeRun
-      : runHistory.find((run) => run.id === selectedRunId) ?? runHistory[0] ?? activeRun;
+      : (runHistory.find((run) => run.id === selectedRunId) ?? runHistory[0] ?? activeRun);
 
   return (
     <section className="panel panel--paper history-shell">
       <div className="panel__header">
         <div>
-          <p className="eyebrow">History</p>
-          <h2>Recent git-ftp activity</h2>
+          <h2>Deployment history</h2>
+          <p className="workspace__subtitle">Every run, with the details to back it up.</p>
         </div>
         {displayedRun ? (
-          <button className="ghost-button" onClick={() => navigator.clipboard.writeText(stringifyLogs(displayedRun))} type="button">
+          <button
+            className="ghost-button"
+            onClick={() => navigator.clipboard.writeText(stringifyLogs(displayedRun))}
+            type="button"
+          >
             Copy logs
           </button>
         ) : null}
@@ -46,12 +50,15 @@ export function LogPanel({ activeRun, runHistory, selectedRunId, onSelectRun }: 
                   key={run.id}
                   type="button"
                   className={clsx('history-card', run.id === displayedRun?.id && 'history-card--active')}
+                  aria-pressed={run.id === displayedRun?.id}
                   onClick={() => onSelectRun(run.id)}
                 >
                   <div className="history-card__line">
                     <strong>{formatRunTitle(run)}</strong>
-                    <span className={run.success ? 'history-pill history-pill--ok' : 'history-pill history-pill--error'}>
-                      {run.success ? 'OK' : 'FAIL'}
+                    <span
+                      className={`history-pill ${!run.finishedAt || run.cancelled ? '' : run.success ? 'history-pill--ok' : 'history-pill--error'}`}
+                    >
+                      {!run.finishedAt ? 'Running' : run.cancelled ? 'Cancelled' : run.success ? 'Success' : 'Failed'}
                     </span>
                   </div>
                   <p>{formatDateTime(run.startedAt)}</p>
@@ -86,7 +93,9 @@ export function LogPanel({ activeRun, runHistory, selectedRunId, onSelectRun }: 
                         ))}
                       </div>
                     ) : (
-                      <p className="console-change-summary__empty">No tracked remote file changes were reported for this sync.</p>
+                      <p className="console-change-summary__empty">
+                        No tracked remote file changes were reported for this sync.
+                      </p>
                     )}
                   </details>
                 ) : null}
@@ -102,7 +111,7 @@ export function LogPanel({ activeRun, runHistory, selectedRunId, onSelectRun }: 
               </>
             ) : (
               <div className="console-empty">
-                <p>The terminal panel will stream stdout and stderr here in real time.</p>
+                <p>Run a deployment to see its live output here.</p>
               </div>
             )}
           </div>

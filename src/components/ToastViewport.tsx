@@ -14,7 +14,7 @@ export function ToastViewport({ toasts, onDismiss }: Props) {
             <strong>{toast.title}</strong>
             {toast.detail ? <p>{toast.detail}</p> : null}
           </div>
-          <button type="button" onClick={() => onDismiss(toast.id)}>
+          <button aria-label="Dismiss notification" type="button" onClick={() => onDismiss(toast.id)}>
             ×
           </button>
         </div>
@@ -22,4 +22,3 @@ export function ToastViewport({ toasts, onDismiss }: Props) {
     </div>
   );
 }
-

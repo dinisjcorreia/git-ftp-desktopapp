@@ -1,3 +1,4 @@
+import { Icon } from './Icon';
 import { useMemo, useState } from 'react';
 import type { DeploymentProfile, RepoInfo, RunAction, RunOptions, RunRecord, StartupDiagnostics } from '../types';
 import { deriveSyncProgress, formatDateTime } from '../lib/utils';
@@ -76,11 +77,14 @@ export function ActionPanel({
     <section className="panel panel--paper changes-workbench">
       <div className="panel__header changes-workbench__header">
         <div>
-          <p className="eyebrow">Changes</p>
-          <h2>{trackedChanges.length > 0 ? `${trackedChanges.length} tracked changes ready to review` : 'Working tree is clean'}</h2>
-          <p className="workspace__subtitle">
-            Keep the main workflow focused: review tracked files, write the commit, and run the selected git-ftp command when you are ready.
-          </p>
+          <h2>
+            {trackedChanges.length > 0
+              ? 'Review your changes'
+              : hasDirtyRepo
+                ? 'No tracked changes'
+                : 'Ready for your next deploy'}
+          </h2>
+          <p className="workspace__subtitle">Review your files, commit your work, then send it live.</p>
         </div>
 
         <div className="changes-workbench__toolbar">
@@ -110,8 +114,8 @@ export function ActionPanel({
         <section className="changes-list">
           <div className="changes-list__header">
             <div>
-              <p className="eyebrow">Tracked files</p>
-              <h3>Pending commit set</h3>
+              <h3>Changed files</h3>
+              <p className="muted">Tracked changes in your working tree</p>
             </div>
             <span className="change-review__count">{trackedChanges.length}</span>
           </div>
@@ -120,6 +124,7 @@ export function ActionPanel({
             <div className="change-review__list">
               {trackedChanges.map((change) => (
                 <div key={`${change.status}:${change.path}`} className="change-review__item">
+                  <Icon name="file" />
                   <span className={`change-review__status change-review__status--${change.tone}`}>{change.status}</span>
                   <code>{change.path}</code>
                 </div>
@@ -127,28 +132,36 @@ export function ActionPanel({
             </div>
           ) : (
             <div className="change-review__empty-state">
-              <p className="change-review__empty">No tracked edits are pending right now. Untracked files stay out of this list so the review stays calm.</p>
+              <span className="empty-state-icon">
+                <Icon name={hasDirtyRepo ? 'file' : 'check'} />
+              </span>
+              <h3>{hasDirtyRepo ? 'No tracked edits to commit' : 'All caught up'}</h3>
+              <p className="change-review__empty">
+                {hasDirtyRepo
+                  ? 'Untracked files aren’t included here. Add them with Git before committing.'
+                  : 'Your tracked files are clean. Make a change locally, and it will appear here.'}
+              </p>
             </div>
           )}
-        </section>
-
-        <aside className="changes-sidebar">
-          <section className="panel panel--ink changes-sidebar__section">
-            <div className="mini-metrics">
-              <div className="metric-card">
-                <span>Selected profile</span>
-                <strong>{profile?.name ?? 'No profile selected'}</strong>
-              </div>
-              <div className="metric-card">
-                <span>Last deployment</span>
-                <strong>{formatDateTime(profile?.lastDeployedAt)}</strong>
-              </div>
-            </div>
-
-            {hasUnsavedChanges ? (
-              <p className="warning-copy">Save the profile first so deploy commands use the latest connection settings.</p>
-            ) : null}
-
+          <div className="commit-box">
+            <label className="commit-box__field">
+              <span>Commit message</span>
+              <input
+                value={commitMessage}
+                onChange={(event) => onCommitMessageChange(event.target.value)}
+                placeholder="Update remote site"
+              />
+            </label>
+            <button
+              className="primary-button primary-button--block"
+              disabled={!canCommitTrackedChanges}
+              onClick={onCommitTrackedChanges}
+              type="button"
+            >
+              <Icon name="branch" /> {isCommitting ? 'Committing…' : 'Commit tracked changes'}
+            </button>
+          </div>
+          <div className="changes-local-actions">
             {hasDirtyRepo ? (
               <>
                 <p className="warning-copy">
@@ -161,9 +174,37 @@ export function ActionPanel({
                   type="button"
                 >
                   <span>Sync with remote</span>
-                  <small>Discard local edits, download the current server state, and capture the changed remote files.</small>
+                  <small>
+                    Discard local edits, download the current server state, and capture the changed remote files.
+                  </small>
                 </button>
               </>
+            ) : null}
+          </div>
+        </section>
+
+        <aside className="changes-sidebar">
+          <section className="panel panel--ink changes-sidebar__section">
+            <div className="mini-metrics">
+              <div className="metric-card">
+                <span>Deploying to</span>
+                <strong>{profile?.name ?? 'Select a profile to deploy'}</strong>
+                <small>
+                  {profile
+                    ? `${profile.host}${profile.remotePath.startsWith('/') ? '' : '/'}${profile.remotePath}`
+                    : 'Use the profile picker above to get started.'}
+                </small>
+              </div>
+              <div className="metric-card">
+                <span>Last deployment</span>
+                <strong>{formatDateTime(profile?.lastDeployedAt)}</strong>
+              </div>
+            </div>
+
+            {hasUnsavedChanges ? (
+              <p className="warning-copy">
+                Save the profile first so deploy commands use the latest connection settings.
+              </p>
             ) : null}
 
             {showSyncProgress ? (
@@ -181,32 +222,12 @@ export function ActionPanel({
                 <p className="run-progress__detail">{syncProgress.detail}</p>
               </section>
             ) : null}
-
-            <div className="commit-box">
-              <label className="commit-box__field">
-                <span>Commit message</span>
-                <input
-                  value={commitMessage}
-                  onChange={(event) => onCommitMessageChange(event.target.value)}
-                  placeholder="Update remote site"
-                />
-              </label>
-              <button
-                className="primary-button primary-button--block"
-                disabled={!canCommitTrackedChanges}
-                onClick={onCommitTrackedChanges}
-                type="button"
-              >
-                {isCommitting ? 'Committing…' : 'Commit tracked changes'}
-              </button>
-            </div>
           </section>
 
           <section className="panel panel--paper changes-sidebar__section">
             <div className="changes-command">
               <div>
-                <p className="eyebrow">Deploy command</p>
-                <h3>Choose one action</h3>
+                <h3>Deploy to server</h3>
               </div>
               <label className="toolbar-select toolbar-select--stacked">
                 <span>Command</span>
@@ -225,14 +246,25 @@ export function ActionPanel({
                 onClick={() => onRun(selectedAction)}
                 type="button"
               >
-                {isRunning ? 'Running…' : 'Run command'}
+                <Icon name="upload" />{' '}
+                {isRunning
+                  ? 'Running…'
+                  : selectedAction === 'push'
+                    ? 'Push changes'
+                    : selectedAction === 'init'
+                      ? 'Initialize remote'
+                      : 'Update remote marker'}
               </button>
               <p className="changes-command__hint">{describeAction(selectedAction)}</p>
             </div>
 
             <div className="action-footer">
-              <p>Commands run in the Rust backend with the installed `git-ftp`, and the app switches to an encoded-path fallback when exact filenames need spaces or similar characters preserved.</p>
-              <button className="ghost-button ghost-button--block" disabled={!isRunning} onClick={onCancel} type="button">
+              <button
+                className="ghost-button ghost-button--block"
+                disabled={!isRunning}
+                onClick={onCancel}
+                type="button"
+              >
                 Cancel active run
               </button>
             </div>

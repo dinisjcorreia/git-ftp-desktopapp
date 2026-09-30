@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Icon } from './components/Icon';
 import { DiagnosticsView } from './components/DiagnosticsView';
 import { RepoSidebar } from './components/RepoSidebar';
 import { ProfileForm } from './components/ProfileForm';
@@ -543,7 +544,35 @@ export default function App() {
     if (isSetupMode) {
       return (
         <section className="workspace-stack">
-          <DiagnosticsView diagnostics={diagnostics} />
+          <div className="setup-intro">
+            <div className="setup-intro__copy">
+              <h2>Start with what’s on your server.</h2>
+              <p>Import your site into a local Git repository, then track and deploy changes from one place.</p>
+              <button className="text-button" onClick={() => void handlePickRepo()} type="button">
+                <Icon name="folder" /> Already have a repository? Open it
+              </button>
+            </div>
+            <div className="transfer-diagram" aria-label="Remote server to local Git repository">
+              <div>
+                <span className="transfer-diagram__node">
+                  <Icon name="server" />
+                </span>
+                <strong>Your server</strong>
+                <small>FTP / SFTP</small>
+              </div>
+              <span className="transfer-diagram__line">
+                <Icon name="arrow" />
+              </span>
+              <div>
+                <span className="transfer-diagram__node transfer-diagram__node--local">
+                  <Icon name="branch" />
+                </span>
+                <strong>Your workspace</strong>
+                <small>Local Git repository</small>
+              </div>
+            </div>
+          </div>
+          {!diagnostics?.overallReady ? <DiagnosticsView diagnostics={diagnostics} /> : null}
           <ConnectionBootstrapPanel
             draft={draft}
             passwordInput={passwordInput}
@@ -557,6 +586,7 @@ export default function App() {
             onDownload={handleBootstrapRemoteRepository}
             onRemoveRemoteState={handleRemoveRemoteState}
           />
+          {diagnostics?.overallReady ? <DiagnosticsView diagnostics={diagnostics} /> : null}
         </section>
       );
     }
@@ -578,6 +608,7 @@ export default function App() {
           <aside className="settings-nav">
             <button
               className={`settings-nav__button ${settingsTab === 'profile' ? 'settings-nav__button--active' : ''}`}
+              aria-pressed={settingsTab === 'profile'}
               onClick={() => setSettingsTab('profile')}
               type="button"
             >
@@ -585,6 +616,7 @@ export default function App() {
             </button>
             <button
               className={`settings-nav__button ${settingsTab === 'environment' ? 'settings-nav__button--active' : ''}`}
+              aria-pressed={settingsTab === 'environment'}
               onClick={() => setSettingsTab('environment')}
               type="button"
             >
@@ -598,11 +630,16 @@ export default function App() {
                 <section className="panel panel--paper settings-summary">
                   <div className="panel__header">
                     <div>
-                      <p className="eyebrow">Selected profile</p>
+                      <p className="eyebrow">Deployment destination</p>
                       <h2>{selectedProfile?.name ?? 'Create a deployment profile'}</h2>
                     </div>
                     <div className="button-row">
-                      <button className="ghost-button" disabled={!selectedProfile} onClick={handleDuplicateProfile} type="button">
+                      <button
+                        className="ghost-button"
+                        disabled={!selectedProfile}
+                        onClick={handleDuplicateProfile}
+                        type="button"
+                      >
                         Duplicate
                       </button>
                       <button
@@ -618,7 +655,9 @@ export default function App() {
                   <div className="summary-grid">
                     <div className="metric-card">
                       <span>Host</span>
-                      <strong>{selectedProfile ? `${selectedProfile.host}:${selectedProfile.port}` : 'Not configured'}</strong>
+                      <strong>
+                        {selectedProfile ? `${selectedProfile.host}:${selectedProfile.port}` : 'Not configured'}
+                      </strong>
                     </div>
                     <div className="metric-card">
                       <span>Remote path</span>
@@ -626,7 +665,11 @@ export default function App() {
                     </div>
                     <div className="metric-card">
                       <span>Last deployment</span>
-                      <strong>{selectedProfile?.lastDeployedAt ? new Date(selectedProfile.lastDeployedAt).toLocaleString() : 'Never'}</strong>
+                      <strong>
+                        {selectedProfile?.lastDeployedAt
+                          ? new Date(selectedProfile.lastDeployedAt).toLocaleString()
+                          : 'Never'}
+                      </strong>
                     </div>
                   </div>
                 </section>
@@ -681,12 +724,11 @@ export default function App() {
       <ToastViewport toasts={toasts} onDismiss={dismissToast} />
 
       <RepoSidebar
-        repoInfo={repoInfo}
         knownRepositories={knownRepositories}
         selectedRepoPath={selectedRepoPath}
-        profileCount={profiles.length}
         environmentLabel={dependencySummary.label}
         environmentTone={dependencySummary.tone}
+        onGoHome={handleGoHome}
         onChooseRepo={handlePickRepo}
         onSelectRepository={handleSelectKnownRepository}
         onShowBootstrapImport={handleShowBootstrapFlow}
@@ -697,130 +739,89 @@ export default function App() {
         <header className="workspace__header">
           <div className="workspace__titlebar">
             <div className="workspace__identity">
-              <p className="eyebrow">Workspace</p>
-              <h1>{repoName ?? 'Git FTP Desktop'}</h1>
-              {isSetupMode ? (
-                <p className="workspace__subtitle">Connect to the server and download it into a local Git repository.</p>
-              ) : null}
+              <span className="workspace__breadcrumb">{isSetupMode ? 'Your workspace' : 'Repository'}</span>
+              <h1>{isSetupMode ? 'Bring your site closer.' : repoName}</h1>
+              <p className="workspace__subtitle">
+                {isSetupMode ? 'From your server to your desktop. Ready for your next change.' : selectedRepoPath}
+              </p>
             </div>
-
             <div className="workspace__toolbar">
-              <label className="toolbar-select">
-                <span>Repository</span>
-                <select
-                  disabled={knownRepositories.length === 0}
-                  onChange={(event) => {
-                    if (event.target.value) {
-                      void handleSelectKnownRepository(event.target.value);
-                    }
-                  }}
-                  value={selectedRepoPath ?? ''}
-                >
-                  <option value="">Select repository</option>
-                  {knownRepositories.map((repository) => (
-                    <option key={repository.path} value={repository.path}>
-                      {repository.path.split(/[\\/]/).filter(Boolean).pop() ?? repository.path}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
               {!isSetupMode ? (
-                <label className="toolbar-select">
-                  <span>Profile</span>
-                  <select
-                    disabled={!repoInfo?.isGitRepo}
-                    onChange={(event) => handleProfileSelect(event.target.value)}
-                    value={selectedProfileId ?? ''}
-                  >
-                    <option value="">No profile selected</option>
-                    {profiles.map((profile) => (
-                      <option key={profile.id} value={profile.id}>
-                        {profile.name}
-                      </option>
-                    ))}
-                    <option value="__new__">Create new profile…</option>
-                  </select>
-                </label>
+                <>
+                  <label className="toolbar-select">
+                    <span>Deployment profile</span>
+                    <select
+                      disabled={!repoInfo?.isGitRepo}
+                      onChange={(event) => handleProfileSelect(event.target.value)}
+                      value={selectedProfileId ?? ''}
+                    >
+                      <option value="">Select a profile</option>
+                      {profiles.map((profile) => (
+                        <option key={profile.id} value={profile.id}>
+                          {profile.name}
+                        </option>
+                      ))}
+                      <option value="__new__">Create new profile…</option>
+                    </select>
+                  </label>
+                  <button className="ghost-button" onClick={handleCreateProfile} type="button">
+                    <Icon name="plus" /> New profile
+                  </button>
+                </>
+              ) : canGoHome ? (
+                <button className="ghost-button" onClick={handleGoHome} type="button">
+                  Back to start
+                </button>
               ) : null}
-
-              <div className="toolbar-actions">
-                {canGoHome ? (
-                  <button className="ghost-button" onClick={handleGoHome} type="button">
-                    Home
-                  </button>
-                ) : null}
-                <button className="ghost-button" onClick={() => void handlePickRepo()} type="button">
-                  Open repo
-                </button>
-                <button className="ghost-button" onClick={handleShowBootstrapFlow} type="button">
-                  Import from FTP
-                </button>
-                {!isSetupMode ? (
-                  <button
-                    className="ghost-button ghost-button--danger"
-                    disabled={!selectedRepoPath}
-                    onClick={() => void handleDeleteRepository()}
-                    type="button"
-                  >
-                    Delete repo
-                  </button>
-                ) : null}
-                {!isSetupMode ? (
-                  <button
-                    className="ghost-button ghost-button--danger"
-                    disabled={!selectedProfile}
-                    onClick={() => void handleDeleteProfile()}
-                    type="button"
-                  >
-                    Delete profile
-                  </button>
-                ) : null}
-                {!isSetupMode ? (
-                  <button className="primary-button" onClick={handleCreateProfile} type="button">
-                    New profile
-                  </button>
-                ) : null}
-              </div>
-            </div>
-          </div>
-
-          <div className="workspace__statusbar">
-            <div className="status-pill">
-              <span>Branch</span>
-              <strong>{repoInfo?.currentBranch ?? 'Not loaded'}</strong>
-            </div>
-            <div className={`status-pill status-pill--${repoInfo?.dirty ? 'warning' : 'neutral'}`}>
-              <span>Working tree</span>
-              <strong>{repoInfo?.isGitRepo ? (repoInfo?.dirty ? 'Changes pending' : 'Clean') : 'Unavailable'}</strong>
-            </div>
-            <div className="status-pill">
-              <span>Tracked files</span>
-              <strong>{trackedChangeCount}</strong>
-            </div>
-            <div className={`status-pill status-pill--${dependencySummary.tone}`}>
-              <span>Environment</span>
-              <strong>{dependencySummary.label}</strong>
             </div>
           </div>
 
           {!isSetupMode ? (
-            <nav className="workspace-tabs" aria-label="Workspace sections">
-              {[
-                ['changes', 'Changes'],
-                ['history', 'History'],
-                ['settings', 'Settings']
-              ].map(([value, label]) => (
+            <>
+              <div className="workspace__statusbar">
+                <span className="branch-label">
+                  <Icon name="branch" />
+                  {repoInfo?.currentBranch ?? 'Detached HEAD'}
+                </span>
+                <span className={`tree-status ${repoInfo?.dirty ? 'tree-status--warning' : ''}`}>
+                  <span className="status-dot" />
+                  {repoInfo?.isGitRepo
+                    ? repoInfo.dirty
+                      ? 'Uncommitted changes'
+                      : 'Working tree clean'
+                    : 'Git repository unavailable'}
+                </span>
+              </div>
+              <nav className="workspace-tabs" aria-label="Workspace sections">
                 <button
-                  key={value}
-                  className={`workspace-tab ${workspaceTab === value ? 'workspace-tab--active' : ''}`}
-                  onClick={() => setWorkspaceTab(value as WorkspaceTab)}
+                  className={`workspace-tab ${workspaceTab === 'changes' ? 'workspace-tab--active' : ''}`}
+                  aria-current={workspaceTab === 'changes' ? 'page' : undefined}
+                  onClick={() => setWorkspaceTab('changes')}
                   type="button"
                 >
-                  {label}
+                  <Icon name="file" />
+                  Changes <span className="tab-count">{trackedChangeCount}</span>
                 </button>
-              ))}
-            </nav>
+                <button
+                  className={`workspace-tab ${workspaceTab === 'history' ? 'workspace-tab--active' : ''}`}
+                  aria-current={workspaceTab === 'history' ? 'page' : undefined}
+                  onClick={() => setWorkspaceTab('history')}
+                  type="button"
+                >
+                  <Icon name="history" />
+                  History
+                </button>
+                <button
+                  className={`workspace-tab ${workspaceTab === 'settings' ? 'workspace-tab--active' : ''}`}
+                  aria-current={workspaceTab === 'settings' ? 'page' : undefined}
+                  onClick={() => setWorkspaceTab('settings')}
+                  type="button"
+                >
+                  <Icon name="settings" />
+                  Settings
+                </button>
+              </nav>
+            </>
           ) : null}
         </header>
 

@@ -1,17 +1,15 @@
 import clsx from 'clsx';
 import type { MouseEvent } from 'react';
 import { openExternalUrl } from '../lib/tauri';
-import type { RepoInfo, SavedRepository } from '../types';
-import { formatDateTime } from '../lib/utils';
-import appLogo from '../assets/app-logo.png';
+import type { SavedRepository } from '../types';
+import { Icon } from './Icon';
 
 type Props = {
-  repoInfo: RepoInfo | null;
   knownRepositories: SavedRepository[];
   selectedRepoPath: string | null;
-  profileCount: number;
   environmentLabel: string;
   environmentTone: 'neutral' | 'success' | 'warning' | 'danger';
+  onGoHome: () => void;
   onChooseRepo: () => void;
   onSelectRepository: (repoPath: string) => void;
   onShowBootstrapImport: () => void;
@@ -19,12 +17,11 @@ type Props = {
 };
 
 export function RepoSidebar({
-  repoInfo,
   knownRepositories,
   selectedRepoPath,
-  profileCount,
   environmentLabel,
   environmentTone,
+  onGoHome,
   onChooseRepo,
   onSelectRepository,
   onShowBootstrapImport,
@@ -36,76 +33,37 @@ export function RepoSidebar({
   };
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar__masthead">
-        <div className="sidebar__brand">
-          <img alt="Git FTP Desktop" className="sidebar__logo" src={appLogo} />
-          <div>
-            <p className="sidebar__label">Git FTP Desktop</p>
-            <h1>Deploy</h1>
-          </div>
+    <aside className="sidebar" aria-label="Repositories">
+      <button className="sidebar__brand" type="button" onClick={onGoHome} aria-label="Go to start">
+        <span className="brand-mark">
+          <Icon name="branch" />
+        </span>
+        <div>
+          <strong>Git FTP</strong>
+          <span>Desktop</span>
         </div>
+      </button>
+
+      <div className="sidebar-action-list">
+        <button className="sidebar-action" onClick={onChooseRepo} type="button">
+          <Icon name="folder" /> Open repository <Icon name="plus" />
+        </button>
+        <button className="sidebar-action" onClick={onShowBootstrapImport} type="button">
+          <Icon name="download" /> Import from FTP
+        </button>
       </div>
 
-      <section className="sidebar__section repo-panel repo-panel--current">
+      <section className="sidebar__repositories">
         <div className="section-heading">
-          <span>Current repository</span>
-          <button className="ghost-button" onClick={onChooseRepo} type="button">
-            {repoInfo ? 'Switch' : 'Attach'}
-          </button>
-        </div>
-
-        {repoInfo ? (
-          <div className="repo-summary">
-            <strong className="repo-summary__name">{repoInfo.path.split(/[\\/]/).filter(Boolean).pop() ?? repoInfo.path}</strong>
-            <p className="repo-summary__path">{repoInfo.path}</p>
-            <div className="repo-meta">
-              <span className="repo-clean">{repoInfo.currentBranch ?? 'Detached HEAD'}</span>
-              <span className={repoInfo.dirty ? 'repo-dirty' : 'repo-clean'}>{repoInfo.dirty ? 'Changes pending' : 'Clean'}</span>
-            </div>
-            {repoInfo.remoteOrigin ? <p className="repo-remote">{repoInfo.remoteOrigin}</p> : null}
-          </div>
-        ) : (
-          <div className="sidebar-empty sidebar-empty--compact">
-            <p>No repository attached yet. Import from FTP or point the app at an existing local Git repo.</p>
-          </div>
-        )}
-      </section>
-
-      <section className="sidebar__section sidebar__section--stats">
-        <div className={`sidebar-stat sidebar-stat--${environmentTone}`}>
-          <span>Environment</span>
-          <strong>{environmentLabel}</strong>
-        </div>
-        <div className="sidebar-stat">
-          <span>Profiles</span>
-          <strong>{profileCount}</strong>
-        </div>
-      </section>
-
-      <section className="sidebar__section">
-        <div className="section-heading">
-          <span>Quick actions</span>
-        </div>
-        <div className="sidebar-action-list">
-          <button className="ghost-button ghost-button--block" onClick={onShowBootstrapImport} type="button">
-            Import from FTP
-          </button>
-          <button className="ghost-button ghost-button--block" onClick={onChooseRepo} type="button">
-            Open local repo
-          </button>
-        </div>
-      </section>
-
-      <section className="sidebar__section sidebar__section--grow">
-        <div className="section-heading">
-          <span>Recent repositories</span>
+          <h2>Repositories</h2>
           <span>{knownRepositories.length}</span>
         </div>
         <div className="profile-list">
           {knownRepositories.length === 0 ? (
-            <div className="sidebar-empty sidebar-empty--compact">
-              <p>Your recently opened repositories will appear here for quick switching.</p>
+            <div className="sidebar-empty">
+              <Icon name="folder" />
+              <p>A place for your projects.</p>
+              <small>Open a local repository or import your site to get started.</small>
             </div>
           ) : (
             knownRepositories.map((repository) => (
@@ -114,24 +72,28 @@ export function RepoSidebar({
                 className={clsx('repo-card', selectedRepoPath === repository.path && 'repo-card--active')}
               >
                 <button
-                  type="button"
                   className="repo-card__body"
+                  type="button"
                   onClick={() => onSelectRepository(repository.path)}
+                  aria-current={selectedRepoPath === repository.path ? 'true' : undefined}
+                  title={repository.path}
                 >
-                  <div className="repo-card__topline">
+                  <Icon name="folder" />
+                  <div>
                     <strong>{repository.path.split(/[\\/]/).filter(Boolean).pop() ?? repository.path}</strong>
-                    <span>{repository.profileCount}</span>
+                    <small>
+                      {repository.profileCount} {repository.profileCount === 1 ? 'profile' : 'profiles'}
+                    </small>
                   </div>
-                  <p>{repository.path}</p>
-                  <small>Last opened {formatDateTime(repository.lastOpenedAt)}</small>
                 </button>
                 <button
-                  aria-label={`Delete ${repository.path}`}
                   className="repo-card__delete"
+                  aria-label={`Remove ${repository.path}`}
+                  title="Remove repository"
                   onClick={() => onDeleteRepository(repository.path)}
                   type="button"
                 >
-                  Delete
+                  <Icon name="close" />
                 </button>
               </div>
             ))
@@ -139,23 +101,19 @@ export function RepoSidebar({
         </div>
       </section>
 
-      <section className="sidebar__section sidebar__credits">
-        <div className="section-heading">
-          <span>Credits</span>
+      <footer className="sidebar__footer">
+        <div className={`environment-status environment-status--${environmentTone}`}>
+          <span className="status-dot" />
+          <span>Environment</span>
+          <strong>{environmentLabel}</strong>
         </div>
-        <p className="sidebar__copy">
-          Created by{' '}
-          <a
-            className="sidebar__link"
-            href="https://github.com/dinisjcorreia"
-            onClick={handleCreditsLinkClick}
-            rel="noreferrer"
-          >
+        <p>
+          Made by{' '}
+          <a href="https://github.com/dinisjcorreia" onClick={handleCreditsLinkClick} rel="noreferrer">
             Dinis Correia
           </a>
-          .
         </p>
-      </section>
+      </footer>
     </aside>
   );
 }
