@@ -15,7 +15,7 @@ type Props = {
   commitMessage: string;
   onOptionsChange: (options: RunOptions) => void;
   onCommitMessageChange: (value: string) => void;
-  onCommitTrackedChanges: () => void;
+  onCommitChanges: () => void;
   onRun: (action: RunAction) => void;
   onCancel: () => void;
   onCopyDebugReport: () => void;
@@ -33,21 +33,19 @@ export function ActionPanel({
   commitMessage,
   onOptionsChange,
   onCommitMessageChange,
-  onCommitTrackedChanges,
+  onCommitChanges,
   onRun,
   onCancel,
   onCopyDebugReport
 }: Props) {
   const [selectedAction, setSelectedAction] = useState<Exclude<RunAction, 'download'>>('push');
-  const trackedChanges = useMemo(
+  const changes = useMemo(
     () =>
-      (repoInfo?.statusSummary ?? [])
-        .filter((entry) => !entry.startsWith('??'))
-        .map((entry) => parseTrackedChange(entry)),
+      (repoInfo?.statusSummary ?? []).map((entry) => parseChange(entry)),
     [repoInfo?.statusSummary]
   );
   const hasDirtyRepo = Boolean(repoInfo?.dirty);
-  const hasTrackedChanges = trackedChanges.length > 0;
+  const hasChanges = changes.length > 0;
   const canDeploy =
     Boolean(diagnostics?.gitAvailable) &&
     Boolean(diagnostics?.gitFtpAvailable) &&
@@ -55,9 +53,9 @@ export function ActionPanel({
     Boolean(profile) &&
     !hasUnsavedChanges &&
     !hasDirtyRepo;
-  const canCommitTrackedChanges =
+  const canCommitChanges =
     Boolean(repoInfo?.isGitRepo) &&
-    hasTrackedChanges &&
+    hasChanges &&
     !hasUnsavedChanges &&
     !isCommitting &&
     !isRunning &&
@@ -78,11 +76,9 @@ export function ActionPanel({
       <div className="panel__header changes-workbench__header">
         <div>
           <h2>
-            {trackedChanges.length > 0
+            {changes.length > 0
               ? 'Review your changes'
-              : hasDirtyRepo
-                ? 'No tracked changes'
-                : 'Ready for your next deploy'}
+              : 'Ready for your next deploy'}
           </h2>
           <p className="workspace__subtitle">Review your files, commit your work, then send it live.</p>
         </div>
@@ -115,14 +111,14 @@ export function ActionPanel({
           <div className="changes-list__header">
             <div>
               <h3>Changed files</h3>
-              <p className="muted">Tracked changes in your working tree</p>
+              <p className="muted">New, modified, and deleted files in your working tree</p>
             </div>
-            <span className="change-review__count">{trackedChanges.length}</span>
+            <span className="change-review__count">{changes.length}</span>
           </div>
 
-          {trackedChanges.length > 0 ? (
+          {changes.length > 0 ? (
             <div className="change-review__list">
-              {trackedChanges.map((change) => (
+              {changes.map((change) => (
                 <div key={`${change.status}:${change.path}`} className="change-review__item">
                   <Icon name="file" />
                   <span className={`change-review__status change-review__status--${change.tone}`}>{change.status}</span>
@@ -133,13 +129,11 @@ export function ActionPanel({
           ) : (
             <div className="change-review__empty-state">
               <span className="empty-state-icon">
-                <Icon name={hasDirtyRepo ? 'file' : 'check'} />
+                <Icon name="check" />
               </span>
-              <h3>{hasDirtyRepo ? 'No tracked edits to commit' : 'All caught up'}</h3>
+              <h3>All caught up</h3>
               <p className="change-review__empty">
-                {hasDirtyRepo
-                  ? 'Untracked files aren’t included here. Add them with Git before committing.'
-                  : 'Your tracked files are clean. Make a change locally, and it will appear here.'}
+                Your files are clean. Make a change locally, and it will appear here.
               </p>
             </div>
           )}
@@ -154,11 +148,11 @@ export function ActionPanel({
             </label>
             <button
               className="primary-button primary-button--block"
-              disabled={!canCommitTrackedChanges}
-              onClick={onCommitTrackedChanges}
+              disabled={!canCommitChanges}
+              onClick={onCommitChanges}
               type="button"
             >
-              <Icon name="branch" /> {isCommitting ? 'Committing…' : 'Commit tracked changes'}
+              <Icon name="branch" /> {isCommitting ? 'Committing…' : 'Commit changes'}
             </button>
           </div>
           <div className="changes-local-actions">
@@ -285,13 +279,13 @@ function describeAction(action: Exclude<RunAction, 'download'>) {
   return 'Deploys only changed files and deletions since the previous successful run.';
 }
 
-function parseTrackedChange(entry: string) {
+function parseChange(entry: string) {
   const normalized = entry.trim();
   const match = normalized.match(/^([A-Z?]{1,2})\s+(.+)$/);
   const code = match?.[1] ?? normalized.slice(0, 2).trim();
   const path = match?.[2]?.trim() ?? normalized;
 
-  if (code.includes('A') || code.includes('C')) {
+  if (code === '??' || code.includes('A') || code.includes('C')) {
     return { status: 'Added', path, tone: 'added' as const };
   }
   if (code.includes('D')) {

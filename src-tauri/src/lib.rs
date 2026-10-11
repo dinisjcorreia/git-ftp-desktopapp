@@ -31,7 +31,7 @@ pub fn run() {
             commands::delete_profile,
             commands::duplicate_profile,
             commands::validate_profile,
-            commands::commit_tracked_changes,
+            commands::commit_changes,
             commands::run_git_ftp_action,
             commands::cancel_running_process,
             commands::fetch_run_history,

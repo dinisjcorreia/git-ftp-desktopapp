@@ -25,7 +25,7 @@ Created by [Dinis Correia](https://github.com/dinisjcorreia).
 - Profile validation with command previews and optional remote probe feedback
 - Secure password storage via OS keychain / credential vault
 - Optional repo-local `git config` defaults for stable connection values
-- Tracked-change review with an in-app commit flow before deployment
+- Change review with an in-app commit flow before deployment
 - Live stdout and stderr streaming from the backend into the UI
 - Support for `git ftp init`, `git ftp push`, `git ftp catchup`, and remote snapshot bootstrap flows
 - Destructive remote sync flow that discards local edits and downloads the current server state after confirmation
@@ -238,8 +238,8 @@ Current exclusions focus on deployment noise rather than source files:
 
 ### Commit and history behavior
 
-- The main changes view focuses on tracked files only and keeps untracked files out of the commit review list
-- Deployment actions are intended to run from a clean working tree after committing tracked changes
+- The main changes view lists new, modified, and deleted files; committing stages all changes while respecting Git ignore rules
+- Deployment actions are intended to run from a clean working tree after committing local changes
 - Run history stores redacted command previews, streamed logs, exit status, and changed-file summaries
 - The persisted run history is capped to the most recent 60 runs
 

@@ -102,8 +102,8 @@ export const validateProfile = (
     probeRemote
   });
 
-export const commitTrackedChanges = (repoPath: string, message: string): Promise<CommitResult> =>
-  invoke('commit_tracked_changes', { repoPath, message });
+export const commitChanges = (repoPath: string, message: string): Promise<CommitResult> =>
+  invoke('commit_changes', { repoPath, message });
 
 export const runGitFtpAction = (request: RunRequest): Promise<RunRecord> =>
   invoke('run_git_ftp_action', { request });
