@@ -48,6 +48,8 @@ try {
         ' M src/pages/index.tsx',
         ' M src/styles/site.scss',
         ' A public/images/project-cover.webp',
+        '?? public/images/new photo.png',
+        '?? public/images/another-photo.png',
         ' D public/old-banner.jpg',
         ' R src/components/Menu.tsx -> src/components/Navigation.tsx'
       ]
@@ -130,7 +132,7 @@ try {
         if (cmd === 'validate_profile')
           return { valid: true, messages: [{ kind: 'info', text: 'Connection successful.' }], repo, diagnostics };
         if (cmd === 'save_profile') return Object.assign(profile, args.draft);
-        if (cmd === 'commit_tracked_changes') {
+        if (cmd === 'commit_changes') {
           repo.dirty = false;
           repo.statusSummary = [];
           return { commitSha: 'abc1234', summary: args.message, repo };
@@ -145,13 +147,27 @@ try {
 
   await page.goto('http://127.0.0.1:1421');
   await page.getByRole('heading', { name: 'Review your changes' }).waitFor();
-  assert.equal(await page.locator('.change-review__item').count(), 5);
+  assert.equal(await page.locator('.change-review__item').count(), 7);
+  assert.equal(await page.getByRole('button', { name: 'Changes 7', exact: true }).count(), 1);
+  assert.match(await page.locator('.change-review__item').filter({ hasText: 'new photo.png' }).innerText(), /Added/);
   assert.equal(await page.getByRole('button', { name: 'Push changes', exact: true }).isEnabled(), false);
   await page.getByLabel('Commit message', { exact: true }).fill('Update site');
-  await page.getByRole('button', { name: 'Commit tracked changes', exact: true }).click();
+  await page.getByRole('button', { name: 'Commit changes', exact: true }).click();
   await page.getByRole('heading', { name: 'All caught up' }).waitFor();
   assert.equal(await page.getByRole('button', { name: 'Push changes', exact: true }).isEnabled(), true);
-  assert.equal(await page.getByRole('button', { name: 'Commit tracked changes', exact: true }).isEnabled(), false);
+  assert.equal(await page.getByRole('button', { name: 'Commit changes', exact: true }).isEnabled(), false);
+  await page.evaluate(async () => {
+    const { useAppStore } = await import('/src/store/appStore.ts');
+    window.testData.repo.dirty = true;
+    window.testData.repo.statusSummary = ['?? assets/new.png'];
+    useAppStore.setState({ repoInfo: { ...window.testData.repo } });
+  });
+  await page.getByRole('button', { name: 'Changes 1', exact: true }).waitFor();
+  assert.match(await page.locator('.change-review__item').innerText(), /Added.*assets\/new.png/s);
+  assert.equal(await page.getByRole('button', { name: 'Push changes', exact: true }).isEnabled(), false);
+  await page.getByRole('button', { name: 'Commit changes', exact: true }).click();
+  await page.getByRole('heading', { name: 'All caught up' }).waitFor();
+  assert.equal(await page.getByRole('button', { name: 'Push changes', exact: true }).isEnabled(), true);
   await page.getByLabel('Dry run', { exact: true }).check();
   await page.getByRole('button', { name: 'Push changes', exact: true }).click();
   await page.getByRole('heading', { name: 'All caught up' }).waitFor();

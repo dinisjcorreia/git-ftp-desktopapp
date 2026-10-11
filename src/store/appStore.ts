@@ -42,7 +42,7 @@ type AppState = {
   saveProfile: (draft: Parameters<typeof api.saveProfile>[1], password?: string) => Promise<DeploymentProfile>;
   deleteProfile: (profileId: string) => Promise<void>;
   duplicateProfile: (profileId: string) => Promise<DeploymentProfile>;
-  commitTrackedChanges: (message: string) => Promise<CommitResult>;
+  commitChanges: (message: string) => Promise<CommitResult>;
   runAction: (profileId: string, action: RunAction, options: RunOptions, password?: string) => Promise<RunRecord>;
   cancelRun: () => Promise<void>;
   refreshHistory: () => Promise<void>;
@@ -296,7 +296,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     return duplicated;
   },
 
-  commitTrackedChanges: async (message) => {
+  commitChanges: async (message) => {
     const repoPath = get().selectedRepoPath;
     if (!repoPath) {
       throw new Error('Select a repository before creating a commit.');
@@ -304,11 +304,11 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     set({ isCommitting: true });
     try {
-      const result = await api.commitTrackedChanges(repoPath, message);
+      const result = await api.commitChanges(repoPath, message);
       await Promise.all([get().refreshRepoInfo(), get().refreshKnownRepositories()]);
       pushToast(set, {
         tone: 'success',
-        title: 'Tracked changes committed',
+        title: 'Changes committed',
         detail: result.commitSha.slice(0, 7)
       });
       set({ isCommitting: false });

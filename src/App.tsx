@@ -40,7 +40,7 @@ export default function App() {
     saveProfile,
     deleteProfile,
     duplicateProfile,
-    commitTrackedChanges,
+    commitChanges,
     runAction,
     cancelRun,
     receiveLogEvents,
@@ -76,8 +76,8 @@ export default function App() {
   const canGoHome = Boolean(selectedRepoPath || showBootstrapFlow);
   const unsavedChanges = hasDraftChanges(draft, selectedProfile);
   const dependencySummary = useMemo(() => summarizeDependencies(diagnostics), [diagnostics]);
-  const trackedChangeCount = useMemo(
-    () => (repoInfo?.statusSummary ?? []).filter((entry) => !entry.startsWith('??')).length,
+  const changeCount = useMemo(
+    () => (repoInfo?.statusSummary ?? []).length,
     [repoInfo?.statusSummary]
   );
 
@@ -527,8 +527,8 @@ export default function App() {
     }
   };
 
-  const handleCommitTrackedChanges = async () => {
-    await commitTrackedChanges(commitMessage);
+  const handleCommitChanges = async () => {
+    await commitChanges(commitMessage);
   };
 
   const handleProfileSelect = (value: string) => {
@@ -708,7 +708,7 @@ export default function App() {
           commitMessage={commitMessage}
           onOptionsChange={setRunOptions}
           onCommitMessageChange={setCommitMessage}
-          onCommitTrackedChanges={handleCommitTrackedChanges}
+          onCommitChanges={handleCommitChanges}
           onRun={handleRunAction}
           onCancel={cancelRun}
           onCopyDebugReport={() => {
@@ -800,7 +800,7 @@ export default function App() {
                   type="button"
                 >
                   <Icon name="file" />
-                  Changes <span className="tab-count">{trackedChangeCount}</span>
+                  Changes <span className="tab-count">{changeCount}</span>
                 </button>
                 <button
                   className={`workspace-tab ${workspaceTab === 'history' ? 'workspace-tab--active' : ''}`}

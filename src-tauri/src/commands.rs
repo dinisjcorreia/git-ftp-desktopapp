@@ -248,11 +248,11 @@ pub async fn validate_profile(
 }
 
 #[tauri::command]
-pub async fn commit_tracked_changes(
+pub async fn commit_changes(
     repo_path: String,
     message: String,
 ) -> Result<CommitResult, String> {
-    into_string_error(git::commit_tracked_changes(&repo_path, &message))
+    into_string_error(git::commit_changes(&repo_path, &message))
 }
 
 #[tauri::command]
